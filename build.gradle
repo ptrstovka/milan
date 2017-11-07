@@ -1,4 +1,5 @@
 apply plugin: 'application'
+apply plugin: 'kotlin'
 
 mainClassName = "milan.AppKt"
 
@@ -16,7 +17,6 @@ buildscript {
     }
 }
 
-apply plugin: 'kotlin'
 
 repositories {
     mavenCentral()
@@ -26,6 +26,7 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
     compile "com.mashape.unirest:unirest-java:1.4.9"
     compile "org.jsoup:jsoup:1.10.3"
+    compile 'io.bretty:console-table-builder:1.2'
 }
 
 compileKotlin {

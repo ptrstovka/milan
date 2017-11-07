@@ -1,19 +1,17 @@
 package milan
 
 import com.mashape.unirest.http.Unirest
-import org.apache.http.impl.client.HttpClients
-import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory
+import org.apache.http.impl.client.HttpClients
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Element
+import org.jsoup.select.Elements
 import java.security.cert.X509Certificate
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
-
-class KolegiumMenuProvider : MenuProvider {
+class KolegiumSmeProvider : MenuProvider {
 
     init {
         initUnirest()
@@ -21,30 +19,23 @@ class KolegiumMenuProvider : MenuProvider {
 
     override fun getMenu(): Menu {
 
-        val content = Unirest.get("https://menucka.sk/denne-menu/presov/apartmany-kolegium").asString().body
+        val content = Unirest.get("https://restauracie.sme.sk/restauracia/apartmany-kolegium_5498-presov_2912/denne-menu").asString().body
+
         val document = Jsoup.parse(content)
-        val rows = document.select("div#restaurant>div.row")
+        val rows = document.select("div.dnesne_menu>div.jedlo_polozka")
 
-        for (row in rows) {
-            val title = row.select("div>div.day-title")
-            if (title.size == 1) {
-                return createMenuFromRow(row.allElements.first())
-            }
-
+        if (rows.isNotEmpty()) {
+            return createMenuFromRows(rows)
         }
 
         return createMenuNotFound()
     }
 
-    private fun createMenuFromRow(element: Element): Menu {
-        val menuElements = element.select("div.col-xs-10.col-sm-10")
-
-        val items = menuElements.map {
-            it.text().trim()
-        }.map {
-            it.trim()
-        }.filter {
-            !it.isEmpty()
+    private fun createMenuFromRows(elements: Elements): Menu {
+        val items = elements.map {
+            val title = it.select("div.left").text()
+            val price = it.select("span.right>b").text()
+            "${title.trim()}\t[${price.trim()}]"
         }
 
         return Menu(true, items)
@@ -58,7 +49,7 @@ class KolegiumMenuProvider : MenuProvider {
         try {
 
             val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
-                override fun getAcceptedIssuers(): Array<java.security.cert.X509Certificate>? {
+                override fun getAcceptedIssuers(): Array<X509Certificate>? {
                     return null
                 }
 

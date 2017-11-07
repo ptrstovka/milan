@@ -26,7 +26,7 @@ class App {
 class Container {
 
     fun resolveMenuProvider(): MenuProvider {
-        return KolegiumMenuProvider()
+        return KolegiumSmeProvider()
     }
 
     fun resolveMenuRenderer(): MenuRenderer {
